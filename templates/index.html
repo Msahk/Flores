@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Querida Gerital</title>
+    <style>
+        :root {
+            --bg-color: #000000;
+            --card-bg: rgba(255, 255, 255, 0.04);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-primary: #f5f5f7;
+            --text-secondary: #86868b;
+            --yellow-accent: #ffc300;
+            --pink-accent: #ff85a1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 16px;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Rejilla Bento adaptable */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        /* Tarjetas estilo Glassmorphism de Apple */
+        .bento-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 28px;
+            padding: 28px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease;
+        }
+
+        .bento-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.16);
+        }
+
+        /* Modulo de Canvas interactivo */
+        .canvas-card {
+            grid-column: span 2;
+            height: 460px;
+        }
+
+        .canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Tarjeta de mensaje lateral */
+        .side-card {
+            grid-column: span 1;
+            height: 460px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .quote-text {
+            font-size: 1.35rem;
+            font-weight: 500;
+            line-height: 1.4;
+            letter-spacing: -0.01em;
+            margin-top: 16px;
+        }
+
+        .yellow-highlight {
+            color: var(--yellow-accent);
+            font-weight: 600;
+        }
+
+        .pink-highlight {
+            color: var(--pink-accent);
+            font-weight: 600;
+        }
+
+        .dedication-title {
+            font-size: 2rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            margin-top: 6px;
+            background: linear-gradient(90deg, var(--pink-accent), var(--yellow-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Modulo interactivo del rompecabezas */
+        .puzzle-card {
+            grid-column: span 3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 440px;
+            text-align: center;
+        }
+
+        #puzzleBoard {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 6px;
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 8px;
+            border-radius: 18px;
+            border: 1px solid var(--card-border);
+        }
+
+        .puzzle-piece {
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+            cursor: pointer;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .puzzle-piece:active {
+            transform: scale(0.95);
+        }
+
+        .reward-overlay {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            margin-top: 20px;
+        }
+
+        .reward-title {
+            font-size: 2rem;
+            font-weight: 600;
+            background: linear-gradient(90deg, var(--pink-accent), var(--yellow-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Modulo de galeria de fotos */
+        .memory-card {
+            grid-column: span 3;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .memory-title {
+            font-size: 2rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            background: linear-gradient(90deg, var(--pink-accent), var(--yellow-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .memory-description {
+            font-size: 1.05rem;
+            line-height: 1.5;
+            color: var(--text-secondary);
+            max-width: 680px;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-top: 8px;
+        }
+
+        .photo-wrapper {
+            aspect-ratio: 1 / 1;
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid var(--card-border);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .gallery-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .photo-wrapper:hover .gallery-photo {
+            transform: scale(1.04);
+        }
+
+        .tag {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Adaptabilidad para dispositivos moviles */
+        @media (max-width: 850px) {
+            body {
+                padding: 12px;
+            }
+
+            .bento-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .canvas-card, .side-card, .puzzle-card, .memory-card {
+                grid-column: span 1;
+            }
+
+            .canvas-card {
+                height: 350px;
+            }
+
+            .side-card {
+                height: auto;
+                gap: 24px;
+            }
+
+            .gallery-grid {
+                grid-template-columns: 1fr;
+            }
+
+            #puzzleBoard {
+                grid-template-columns: repeat(3, 85px);
+                grid-template-rows: repeat(3, 85px);
+            }
+
+            .puzzle-piece {
+                width: 85px;
+                height: 85px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bento-grid">
+        <div class="bento-card canvas-card">
+            <div class="canvas-container">
+                <canvas id="botanicalCanvas"></canvas>
+            </div>
+        </div>
+
+        <div class="bento-card side-card">
+            <div>
+                <span class="tag">Pensamiento</span>
+                <p class="quote-text">
+                    Eres mi <span class="yellow-highlight">niña</span> <span class="pink-highlight">preciosa &lt;3</span>.
+                </p>
+            </div>
+            <div>
+                <span class="tag">&lt;3</span>
+                <div class="dedication-title">Te quiero mi Gerital</div>
+            </div>
+        </div>
+
+        <div class="bento-card puzzle-card">
+            <span class="tag">Completalo</span>
+            <div id="puzzleBoard"></div>
+
+            <div id="reward" class="reward-overlay">
+                <h3 class="reward-title">ERES LA MEJOR</h3>
+                <p style="font-size: 1.1rem; margin-top: 6px; color: var(--yellow-accent);">Te quiero mucho, te ganaste una fruna :D</p>
+            </div>
+        </div>
+
+        <div class="bento-card memory-card">
+            <span class="tag">Primer Mes</span>
+            <h2 class="memory-title">¡Feliz primer mes juntos!</h2>
+            <p class="memory-description">
+                Gracias por este primer mes tan especial. Cada momento a tu lado se siente increible y esto es solo el comienzo de todo lo que nos espera.
+            </p>
+            <div class="gallery-grid">
+                <div class="photo-wrapper">
+                    <img src="/static/foto1.jpg" alt="Foto 1" class="gallery-photo">
+                </div>
+                <div class="photo-wrapper">
+                    <img src="/static/foto2.jpg" alt="Foto 2" class="gallery-photo">
+                </div>
+                <div class="photo-wrapper">
+                    <img src="/static/foto3.jpg" alt="Foto 3" class="gallery-photo">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Renderizado del lienzo
+        const canvas = document.getElementById('botanicalCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resize() {
+            canvas.width = canvas.parentElement.offsetWidth;
+            canvas.height = canvas.parentElement.offsetHeight;
+        }
+        resize();
+        window.addEventListener('resize', resize);
+
+        class Plant {
+            constructor(x, targetY, type, scale, delay) {
+                this.x = x;
+                this.currentY = canvas.height + 60;
+                this.targetY = targetY;
+                this.type = type;
+                this.scale = scale;
+                this.delay = delay;
+
+                this.stemSpeed = (2.2 + Math.random() * 1.2) * scale;
+                this.bloomProgress = 0;
+                this.maxBloom = (18 + Math.random() * 8) * scale;
+                this.bloomSpeed = 0.28 * scale;
+                this.ticks = 0;
+            }
+
+            drawStem() {
+                ctx.beginPath();
+                ctx.moveTo(this.x, canvas.height);
+                ctx.quadraticCurveTo(
+                    this.x + Math.sin(this.currentY * 0.008) * 18,
+                    (canvas.height + this.currentY) / 2,
+                    this.x,
+                    this.currentY
+                );
+                ctx.strokeStyle = this.type === 'sunflower' ? '#1b4332' : '#2d5a27';
+                ctx.lineWidth = 3.5 * this.scale;
+                ctx.stroke();
+            }
+
+            drawSunflower() {
+                const petals = 18;
+                for (let i = 0; i < petals; i++) {
+                    const angle = (i * Math.PI * 2) / petals;
+                    const px = this.x + Math.cos(angle) * (this.bloomProgress * 1.15);
+                    const py = this.targetY + Math.sin(angle) * (this.bloomProgress * 1.15);
+                    ctx.beginPath();
+                    ctx.ellipse(px, py, this.bloomProgress, this.bloomProgress * 0.38, angle, 0, Math.PI * 2);
+                    ctx.fillStyle = '#ffc300';
+                    ctx.fill();
+                }
+                ctx.beginPath();
+                ctx.arc(this.x, this.targetY, this.bloomProgress * 0.6, 0, Math.PI * 2);
+                ctx.fillStyle = '#280d00';
+                ctx.fill();
+            }
+
+            drawLily() {
+                const petals = 6;
+                for (let i = 0; i < petals; i++) {
+                    const angle = (i * Math.PI * 2) / petals;
+                    const px = this.x + Math.cos(angle) * (this.bloomProgress * 0.85);
+                    const py = this.targetY + Math.sin(angle) * (this.bloomProgress * 0.85);
+                    ctx.beginPath();
+                    ctx.ellipse(px, py, this.bloomProgress * 1.25, this.bloomProgress * 0.42, angle, 0, Math.PI * 2);
+                    ctx.fillStyle = i % 2 === 0 ? '#ff85a1' : '#f8f9fa';
+                    ctx.fill();
+                }
+                ctx.beginPath();
+                ctx.arc(this.x, this.targetY, this.bloomProgress * 0.2, 0, Math.PI * 2);
+                ctx.fillStyle = '#70e000';
+                ctx.fill();
+            }
+
+            update() {
+                if (this.ticks < this.delay) {
+                    this.ticks++;
+                    return;
+                }
+                if (this.currentY > this.targetY) {
+                    this.currentY -= this.stemSpeed;
+                } else if (this.bloomProgress < this.maxBloom) {
+                    this.bloomProgress += this.bloomSpeed;
+                }
+
+                this.drawStem();
+
+                if (this.currentY <= this.targetY) {
+                    if (this.type === 'sunflower') this.drawSunflower();
+                    else if (this.type === 'lily') this.drawLily();
+                }
+            }
+        }
+
+        let flora = [];
+
+        function buildBalancedGarden() {
+            flora = [];
+
+            const totalPlants = 11;
+            const margin = 40;
+            const step = (canvas.width - margin * 2) / (totalPlants - 1);
+
+            for (let i = 0; i < totalPlants; i++) {
+                const x = margin + step * i + (Math.random() * 24 - 12);
+                const yRatio = (i % 3 === 0) ? 0.15 : (i % 2 === 0) ? 0.32 : 0.52;
+                const y = canvas.height * (yRatio + Math.random() * 0.1);
+                
+                const type = i % 2 === 0 ? 'sunflower' : 'lily';
+                const scale = 0.7 + (1 - yRatio) * 0.4;
+                const delay = i * 4;
+
+                flora.push(new Plant(x, y, type, scale, delay));
+            }
+        }
+
+        buildBalancedGarden();
+
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            flora.forEach(plant => plant.update());
+            requestAnimationFrame(render);
+        }
+        render();
+
+        // Lógica del rompecabezas desde servidor
+        const puzzleBoard = document.getElementById('puzzleBoard');
+        const reward = document.getElementById('reward');
+        let selectedPiece = null;
+
+        function initPuzzle() {
+            const img = new Image();
+            img.src = '/static/foto.png';
+            
+            img.onload = () => {
+                puzzleBoard.innerHTML = '';
+                
+                const pieceSize = window.innerWidth <= 850 ? 85 : 100;
+                const totalSize = pieceSize * 3;
+
+                const cropCanvas = document.createElement('canvas');
+                const cropCtx = cropCanvas.getContext('2d');
+                cropCanvas.width = totalSize;
+                cropCanvas.height = totalSize;
+
+                const minDim = Math.min(img.width, img.height);
+                cropCtx.drawImage(
+                    img,
+                    (img.width - minDim) / 2, (img.height - minDim) / 2, minDim, minDim,
+                    0, 0, totalSize, totalSize
+                );
+
+                let positions = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+                let shuffled = [...positions].sort(() => Math.random() - 0.5);
+
+                shuffled.forEach((pos) => {
+                    const row = Math.floor(pos / 3);
+                    const col = pos % 3;
+
+                    const pieceCanvas = document.createElement('canvas');
+                    pieceCanvas.width = pieceSize;
+                    pieceCanvas.height = pieceSize;
+                    pieceCanvas.className = 'puzzle-piece';
+                    pieceCanvas.dataset.correctPos = pos;
+
+                    const pCtx = pieceCanvas.getContext('2d');
+                    pCtx.drawImage(cropCanvas, col * pieceSize, row * pieceSize, pieceSize, pieceSize, 0, 0, pieceSize, pieceSize);
+
+                    pieceCanvas.addEventListener('click', () => handlePieceClick(pieceCanvas));
+                    puzzleBoard.appendChild(pieceCanvas);
+                });
+            };
+        }
+
+        function handlePieceClick(piece) {
+            if (!selectedPiece) {
+                selectedPiece = piece;
+                piece.style.outline = '2px solid var(--pink-accent)';
+            } else {
+                if (selectedPiece !== piece) {
+                    const nextSiblingSelected = selectedPiece.nextSibling === piece ? selectedPiece : selectedPiece.nextSibling;
+                    puzzleBoard.insertBefore(selectedPiece, piece);
+                    puzzleBoard.insertBefore(piece, nextSiblingSelected);
+                    checkWin();
+                }
+                selectedPiece.style.outline = 'none';
+                selectedPiece = null;
+            }
+        }
+
+        function checkWin() {
+            const currentPieces = Array.from(puzzleBoard.children);
+            const isCorrect = currentPieces.every((piece, index) => {
+                return parseInt(piece.dataset.correctPos) === index;
+            });
+
+            if (isCorrect) {
+                reward.style.display = 'flex';
+            }
+        }
+
+        initPuzzle();
+    </script>
+</body>
+</html>
