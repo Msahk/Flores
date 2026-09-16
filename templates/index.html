@@ -460,48 +460,64 @@
         let selectedPiece = null;
 
         function initPuzzle() {
-            const img = new Image();
-            img.src = '/static/foto.png';
+    const img = new Image();
+    // Forzar la carga limpia de la imagen
+    img.src = "{{ url_for('static', filename='foto.png') }}";
+    
+    img.onload = () => {
+        puzzleBoard.innerHTML = '';
+        
+        const pieceSize = window.innerWidth <= 850 ? 85 : 100;
+        const totalSize = pieceSize * 3;
+
+        const cropCanvas = document.createElement('canvas');
+        const cropCtx = cropCanvas.getContext('2d');
+        cropCanvas.width = totalSize;
+        cropCanvas.height = totalSize;
+
+        // Recorte cuadrado proporcional centrado
+        const minDim = Math.min(img.width, img.height);
+        const startX = (img.width - minDim) / 2;
+        const startY = (img.height - minDim) / 2;
+
+        cropCtx.drawImage(
+            img,
+            startX, startY, minDim, minDim,
+            0, 0, totalSize, totalSize
+        );
+
+        const positions = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+        const shuffled = [...positions].sort(() => Math.random() - 0.5);
+
+        shuffled.forEach((pos) => {
+            const row = Math.floor(pos / 3);
+            const col = pos % 3;
+
+            const pieceCanvas = document.createElement('canvas');
+            pieceCanvas.width = pieceSize;
+            pieceCanvas.height = pieceSize;
+            pieceCanvas.className = 'puzzle-piece';
+            pieceCanvas.dataset.correctPos = pos;
+
+            const pCtx = pieceCanvas.getContext('2d');
+            pCtx.drawImage(
+                cropCanvas,
+                col * pieceSize, row * pieceSize, pieceSize, pieceSize,
+                0, 0, pieceSize, pieceSize
+            );
+
+            // Control de interacciones multitáctiles y click
+            pieceCanvas.addEventListener('click', () => handlePieceClick(pieceCanvas));
             
-            img.onload = () => {
-                puzzleBoard.innerHTML = '';
-                
-                const pieceSize = window.innerWidth <= 850 ? 85 : 100;
-                const totalSize = pieceSize * 3;
+            puzzleBoard.appendChild(pieceCanvas);
+        });
+    };
 
-                const cropCanvas = document.createElement('canvas');
-                const cropCtx = cropCanvas.getContext('2d');
-                cropCanvas.width = totalSize;
-                cropCanvas.height = totalSize;
-
-                const minDim = Math.min(img.width, img.height);
-                cropCtx.drawImage(
-                    img,
-                    (img.width - minDim) / 2, (img.height - minDim) / 2, minDim, minDim,
-                    0, 0, totalSize, totalSize
-                );
-
-                let positions = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-                let shuffled = [...positions].sort(() => Math.random() - 0.5);
-
-                shuffled.forEach((pos) => {
-                    const row = Math.floor(pos / 3);
-                    const col = pos % 3;
-
-                    const pieceCanvas = document.createElement('canvas');
-                    pieceCanvas.width = pieceSize;
-                    pieceCanvas.height = pieceSize;
-                    pieceCanvas.className = 'puzzle-piece';
-                    pieceCanvas.dataset.correctPos = pos;
-
-                    const pCtx = pieceCanvas.getContext('2d');
-                    pCtx.drawImage(cropCanvas, col * pieceSize, row * pieceSize, pieceSize, pieceSize, 0, 0, pieceSize, pieceSize);
-
-                    pieceCanvas.addEventListener('click', () => handlePieceClick(pieceCanvas));
-                    puzzleBoard.appendChild(pieceCanvas);
-                });
-            };
-        }
+    // Recargar si la imagen falla por caché
+    img.onerror = () => {
+        console.error("Error al cargar la imagen del puzzle.");
+    };
+}
 
         function handlePieceClick(piece) {
             if (!selectedPiece) {
