@@ -1,536 +1,1591 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Querida Gerital</title>
-    <style>
-        :root {
-            --bg-color: #000000;
-            --card-bg: rgba(255, 255, 255, 0.04);
-            --card-border: rgba(255, 255, 255, 0.08);
-            --text-primary: #f5f5f7;
-            --text-secondary: #86868b;
-            --yellow-accent: #ffc300;
-            --pink-accent: #ff85a1;
-        }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
-        }
+    <meta name="theme-color" content="#000000">
+    <meta name="description" content="Un pequeño universo hecho para Gerital.">
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px 16px;
-            overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
-        }
+    <title>Querida Gerital | Nuestro segundo mes</title>
 
-        /* Rejilla Bento adaptable */
-        .bento-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            max-width: 1000px;
-            width: 100%;
-        }
-
-        /* Tarjetas estilo Glassmorphism de Apple */
-        .bento-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 28px;
-            padding: 28px;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease;
-        }
-
-        .bento-card:hover {
-            transform: translateY(-2px);
-            border-color: rgba(255, 255, 255, 0.16);
-        }
-
-        /* Modulo de Canvas interactivo */
-        .canvas-card {
-            grid-column: span 2;
-            height: 460px;
-        }
-
-        .canvas-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-
-        canvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-
-        /* Tarjeta de mensaje lateral */
-        .side-card {
-            grid-column: span 1;
-            height: 460px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .quote-text {
-            font-size: 1.35rem;
-            font-weight: 500;
-            line-height: 1.4;
-            letter-spacing: -0.01em;
-            margin-top: 16px;
-        }
-
-        .yellow-highlight {
-            color: var(--yellow-accent);
-            font-weight: 600;
-        }
-
-        .pink-highlight {
-            color: var(--pink-accent);
-            font-weight: 600;
-        }
-
-        .dedication-title {
-            font-size: 2rem;
-            font-weight: 600;
-            letter-spacing: -0.02em;
-            margin-top: 6px;
-            background: linear-gradient(90deg, var(--pink-accent), var(--yellow-accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        /* Modulo interactivo del rompecabezas */
-        .puzzle-card {
-            grid-column: span 3;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 440px;
-            text-align: center;
-        }
-
-        #puzzleBoard {
-            display: grid;
-            grid-template-columns: repeat(3, 100px);
-            grid-template-rows: repeat(3, 100px);
-            gap: 6px;
-            margin-top: 20px;
-            background: rgba(255, 255, 255, 0.02);
-            padding: 8px;
-            border-radius: 18px;
-            border: 1px solid var(--card-border);
-        }
-
-        .puzzle-piece {
-            width: 100px;
-            height: 100px;
-            border-radius: 10px;
-            cursor: pointer;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            transition: opacity 0.2s ease, transform 0.2s ease;
-        }
-
-        .puzzle-piece:active {
-            transform: scale(0.95);
-        }
-
-        .reward-overlay {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-            margin-top: 20px;
-        }
-
-        .reward-title {
-            font-size: 2rem;
-            font-weight: 600;
-            background: linear-gradient(90deg, var(--pink-accent), var(--yellow-accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        /* Modulo de galeria de fotos */
-        .memory-card {
-            grid-column: span 3;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .memory-title {
-            font-size: 2rem;
-            font-weight: 600;
-            letter-spacing: -0.02em;
-            background: linear-gradient(90deg, var(--pink-accent), var(--yellow-accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .memory-description {
-            font-size: 1.05rem;
-            line-height: 1.5;
-            color: var(--text-secondary);
-            max-width: 680px;
-        }
-
-        .gallery-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 14px;
-            margin-top: 8px;
-        }
-
-        .photo-wrapper {
-            aspect-ratio: 1 / 1;
-            border-radius: 18px;
-            overflow: hidden;
-            border: 1px solid var(--card-border);
-            background: rgba(255, 255, 255, 0.02);
-        }
-
-        .gallery-photo {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .photo-wrapper:hover .gallery-photo {
-            transform: scale(1.04);
-        }
-
-        .tag {
-            font-size: 0.72rem;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            color: var(--text-secondary);
-            font-weight: 600;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Adaptabilidad para dispositivos moviles */
-        @media (max-width: 850px) {
-            body {
-                padding: 12px;
-            }
-
-            .bento-grid {
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
-
-            .canvas-card, .side-card, .puzzle-card, .memory-card {
-                grid-column: span 1;
-            }
-
-            .canvas-card {
-                height: 350px;
-            }
-
-            .side-card {
-                height: auto;
-                gap: 24px;
-            }
-
-            .gallery-grid {
-                grid-template-columns: 1fr;
-            }
-
-            #puzzleBoard {
-                grid-template-columns: repeat(3, 85px);
-                grid-template-rows: repeat(3, 85px);
-            }
-
-            .puzzle-piece {
-                width: 85px;
-                height: 85px;
-            }
-        }
-    </style>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
 
-    <div class="bento-grid">
-        <div class="bento-card canvas-card">
-            <div class="canvas-container">
-                <canvas id="botanicalCanvas"></canvas>
-            </div>
+<main class="bento-grid">
+
+
+    <section class="bento-card canvas-card"
+             aria-label="Jardín de girasoles y lirios">
+
+        <div class="canvas-container">
+            <canvas id="botanicalCanvas"></canvas>
         </div>
 
-        <div class="bento-card side-card">
-            <div>
-                <span class="tag"><3</span>
-                <p class="quote-text">
-                    Eres mi <span class="yellow-highlight">niña</span> <span class="pink-highlight">preciosa &lt;3</span>.
-                </p>
-            </div>
-            <div>
-                <span class="tag">&lt;3</span>
-                <div class="dedication-title">Te quiero mi Gerital</div>
-            </div>
-        </div>
+    </section>
 
-        <div class="bento-card puzzle-card">
-            <span class="tag">Completalo</span>
-            <div id="puzzleBoard"></div>
 
-            <div id="reward" class="reward-overlay">
-                <h3 class="reward-title">ERES LA MEJOR</h3>
-                <p style="font-size: 1.1rem; margin-top: 6px; color: var(--yellow-accent);">Te quiero mucho, te ganaste una fruna :D</p>
-            </div>
-        </div>
+    <section class="bento-card side-card">
 
-        <div class="bento-card memory-card">
-            <span class="tag"><3</span>
-            <h2 class="memory-title">¡Feliz primer mes de novios!</h2>
-            <p class="memory-description">
-                Este primer mes tan especial y los meses desde que te conozco, me han hecho saber lo increible que eres, cada momento a tu lado se siente demasiado bien y esto es solo el comienzo de todo lo que nos espera. Me siento orgulloso de tener una persona tan maravillosa, inteligente y hermosa en mi vida como lo eres tu.
+        <div>
+            <span class="tag">PARA MI PERSONA FAVORITA</span>
+
+            <p class="quote-text">
+                Eres mi
+                <span class="yellow-highlight">niña</span>
+                <span class="pink-highlight">preciosa &lt;3</span>.
             </p>
-            <div class="gallery-grid">
-                <div class="photo-wrapper">
-                    <img src="/static/foto1.jpg" alt="Foto 1" class="gallery-photo">
-                </div>
-                <div class="photo-wrapper">
-                    <img src="/static/foto2.jpg" alt="Foto 2" class="gallery-photo">
-                </div>
-                <div class="photo-wrapper">
-                    <img src="/static/foto3.jpg" alt="Foto 3" class="gallery-photo">
-                </div>
+        </div>
+        <img src="{{ url_for('static', filename='snoopy.gif') }}" alt="snoopy" srcset="">
+        <div>
+            <span class="tag">CON TODO MI CARIÑO</span>
+
+            <div class="dedication-title">
+                Te quiero, mi Gerital
             </div>
         </div>
-    </div>
 
-    <script>
-        // Renderizado del lienzo
-        const canvas = document.getElementById('botanicalCanvas');
-        const ctx = canvas.getContext('2d');
+    </section>
 
-        function resize() {
-            canvas.width = canvas.parentElement.offsetWidth;
-            canvas.height = canvas.parentElement.offsetHeight;
+
+    <!-- ==================================================
+         3.  CARTA SECRETA
+         ================================================== -->
+
+    <section class="bento-card letter-card">
+
+        <div class="letter-intro">
+            <span class="section-eyebrow">UNA CARTA PARA TI</span>
+
+            <h1 class="section-title">
+                Feliz segundo mes, mi Gerital bonita &lt;3
+            </h1>
+
+            <p class="letter-subtitle">
+                Te escribi una cartita
+            </p>
+        </div>
+
+        <button
+            type="button"
+            id="openLetter"
+            class="letter-envelope"
+            aria-label="Abrir la carta secreta"
+            aria-haspopup="dialog">
+
+            <span class="envelope-back"></span>
+
+            <span class="envelope-letter">
+                <span>Para mi Gerital</span>
+                <small>Mi flaca hermosa</small>
+            </span>
+
+            <span class="envelope-flap"></span>
+
+            <span class="envelope-front"></span>
+
+            <span class="envelope-seal" aria-hidden="true">
+                &lt;3
+            </span>
+
+        </button>
+
+        <p class="letter-subtitle">
+            Toca el sobre
+        </p>
+
+    </section>
+
+
+    <!-- ==================================================
+         4. NUEVO: UNIVERSO DE RECUERDOS
+         ================================================== -->
+
+    <section class="bento-card universe-card">
+
+        <div class="section-heading">
+            <span class="section-eyebrow">
+                NUESTRO PEQUEÑO UNIVERSO
+            </span>
+
+            <h2 class="section-title">
+                Entre tantas estrellas, te encontré, mi solecito &lt;3.
+            </h2>
+
+            <p class="section-description">
+                Cada estrella guarda un pequeño recuerdo, presionalas
+            </p>
+        </div>
+
+        <div
+            id="universeScene"
+            class="universe-scene"
+            aria-label="Cielo de recuerdos interactivo">
+        </div>
+
+        <div class="star-detail" aria-live="polite">
+
+            <span class="star-detail-label">
+                RECUERDO SELECCIONADO
+            </span>
+
+            <h3 id="starDetailTitle" class="star-detail-title">
+                Elige tu primera estrella
+            </h3>
+
+            <p id="starDetailText" class="star-detail-text">
+                Toca cualquiera de las estrellas para descubrir
+                lo que he guardado en ella.
+            </p>
+
+        </div>
+
+        <div class="universe-progress">
+
+            <span id="universeProgressText">
+                0 de 6 recuerdos
+            </span>
+
+            <div
+                class="universe-progress-track"
+                role="progressbar"
+                aria-label="Recuerdos descubiertos"
+                aria-valuemin="0"
+                aria-valuemax="6"
+                aria-valuenow="0"
+                id="universeProgress">
+
+                <div
+                    class="universe-progress-fill"
+                    id="universeProgressFill">
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ==================================================
+         5. NUEVO: MÁQUINA DE PREMIOS
+         ================================================== -->
+
+    <section class="bento-card prize-card">
+
+        <div class="section-heading">
+            <span class="section-eyebrow">
+                UNA PEQUEÑA SORPRESA
+            </span>
+
+            <h2 class="section-title">
+                Máquina de premios
+            </h2>
+
+            <p class="section-description">
+                Intenta atrapar un premio.
+                Todos tienen una misión: hacerte sonreír.
+            </p>
+        </div>
+
+        <div class="prize-layout">
+
+            <div class="claw-machine">
+
+                <div class="machine-glass">
+
+                    <div class="machine-rail"></div>
+
+                    <div class="machine-claw" id="machineClaw"></div>
+
+                    <div class="machine-prizes" aria-hidden="true">
+                        <div class="machine-prize">♥</div>
+                        <div class="machine-prize">✿</div>
+                        <div class="machine-prize">★</div>
+                        <div class="machine-prize">♡</div>
+                        <div class="machine-prize">✦</div>
+                        <div class="machine-prize">♥</div>
+                    </div>
+
+                </div>
+
+                <div class="machine-controls">
+
+                    <button
+                        type="button"
+                        id="grabPrize"
+                        class="machine-control-button">
+
+                        Intentar atrapar un premio
+
+                    </button>
+
+                </div>
+
+            </div>
+
+            <div class="prize-information">
+
+                <span class="section-eyebrow">
+                    ¿QUÉ HABRÁ DENTRO?
+                </span>
+
+                <h3>
+                    CUPONES DE AMOR.
+                </h3>
+
+                <p>
+                    Puede ser una cita, un abrazo, una salida
+                    o una tarde romántica, los puedes reclamar cuando quieras y las veces que quieras.
+                </p>
+
+                <p>
+                    Dale clic en intentar hasta desbloquearlos todos.
+                </p>
+
+            </div>
+
+        </div>
+
+        <div
+            id="prizeResult"
+            class="prize-result"
+            aria-live="polite">
+
+            <h3 id="prizeResultTitle" class="prize-result-title">
+                ¡Tenemos un premio!
+            </h3>
+
+            <p id="prizeResultText" class="prize-result-text"></p>
+
+            <p id="prizeResultNote" class="prize-result-note"></p>
+
+        </div>
+
+    </section>
+
+
+    <!-- ==================================================
+         6. NUEVO: BANDA SONORA DE LA RELACIÓN
+         ================================================== -->
+
+    <section class="bento-card music-card">
+
+        <div class="music-header">
+
+            <span class="section-eyebrow">
+                CANCIONES BONITAS
+            </span>
+
+            <h2 class="section-title">
+                Tres canciones, que me hacen pensar mucho en ti
+            </h2>
+
+            <p class="section-description">
+                Hay un montón de canciones que me recuerdan a ti, pero estas tres son las que más me hacen sonreír ultimamente, espero que las disfrutes tanto como yo
+            </p>
+
+        </div>
+
+        <div class="music-grid">
+
+    <!-- CANCIÓN 1: HONEYBEE -->
+    <article class="song-card">
+
+        <div class="song-artwork">
+            <div class="song-artwork-placeholder">
+                <img src="/static/portada1.png" alt="" srcset="">
+            </div>
+        </div>
+
+        <span class="song-number">CANCIÓN 01 · DULZURA</span>
+
+        <h3 class="song-title">honeybee</h3>
+
+        <p class="song-artist">Olivia Rodrigo</p>
+
+        <p class="song-dedication">
+            Me gusta pensar que hasta los detalles más pequeños
+            se vuelven bonitos cuando los comparto contigo.
+            Esta canción es un pequeño recordatorio de lo
+            especial que eres para mí.
+        </p>
+
+        <div class="spotify-code-wrap">
+            <div class="spotify-code">
+                <img
+                    src="{{ url_for('static', filename='spotify-code-1.jpeg') }}"
+                    alt="Código Spotify de honeybee, de Olivia Rodrigo"
+                    loading="lazy">
+            </div>
+
+        </div>
+
+        <a
+            class="spotify-link"
+            href="https://open.spotify.com/intl-es/track/407LgLkk1uM3wMO6jVRe0a"
+            target="_blank"
+            rel="noopener noreferrer">
+            Aca abres directo en spotify
+        </a>
+
+    </article>
+
+
+    <!-- CANCIÓN 2: UNTIL I FOUND YOU -->
+    <article class="song-card">
+
+        <div class="song-artwork">
+            <div class="song-artwork-placeholder variant-two">
+                <img src="/static/portada2.png" alt="" srcset="">
+            </div>
+        </div>
+
+        <span class="song-number">CANCIÓN 02 · DESTINO</span>
+
+        <h3 class="song-title">Until I Found You</h3>
+
+        <p class="song-artist">Stephen Sanchez</p>
+
+        <p class="song-dedication">
+            De todas las personas que podía encontrar en este
+            mundo, me hace feliz que nuestros caminos se hayan
+            cruzado. Me encanta lo que estamos construyendo
+            juntos.
+        </p>
+
+        <div class="spotify-code-wrap">
+            <div class="spotify-code">
+                <img
+                    src="{{ url_for('static', filename='spotify-code-2.jpeg') }}"
+                    alt="Código Spotify de Until I Found You, de Stephen Sanchez"
+                    loading="lazy">
+            </div>
+
+        </div>
+
+        <a
+            class="spotify-link"
+            href="https://open.spotify.com/intl-es/track/6VhuP99TE6gYNQRJIlAWFD"
+            target="_blank"
+            rel="noopener noreferrer">
+            Aca abres directo en spotify
+        </a>
+
+    </article>
+
+
+    <!-- CANCIÓN 3: LO MEJOR QUE HAY EN MI VIDA -->
+    <article class="song-card">
+
+        <div class="song-artwork">
+            <div class="song-artwork-placeholder variant-three">
+                <img src="/static/portada3.png" alt="" srcset="">
+            </div>
+        </div>
+
+        <span class="song-number">CANCIÓN 03 · TÚ Y YO</span>
+
+        <h3 class="song-title">Lo Mejor Que Hay en Mi Vida</h3>
+
+        <p class="song-artist">Andrés Cepeda</p>
+
+        <p class="song-dedication">
+            Esta es una canción que me recuerda
+            lo importante que te has vuelto para mí.
+            Gracias por hacer parte de esta etapa tan bonita
+            de mi vida.
+        </p>
+
+        <div class="spotify-code-wrap">
+            <div class="spotify-code">
+                <img
+                    src="{{ url_for('static', filename='spotify-code-3.jpeg') }}"
+                    alt="Código Spotify de Lo Mejor Que Hay en Mi Vida, de Andrés Cepeda"
+                    loading="lazy">
+            </div>
+
+        </div>
+
+        <a
+            class="spotify-link"
+            href="https://open.spotify.com/intl-es/track/6fob9q29prHNuUkPlaOaEO"
+            target="_blank"
+            rel="noopener noreferrer">
+            Aca abres directo en spotify
+        </a>
+
+    </article>
+
+</div>
+
+        <p class="music-footer">
+            Son muchas las canciones de amor que me hacen pensar en ti.
+        </p>
+
+    </section>
+
+
+    <!-- ==================================================
+         7. ROMPECABEZAS ORIGINAL
+         ================================================== -->
+
+    <section class="bento-card puzzle-card">
+
+        <span class="tag">CAPITULO 01</span>
+
+        <h2 class="section-title">
+            NUESTRO PRIMER MES JUNTOS
+        </h2>
+
+
+        <div id="puzzleBoard"></div>
+        <p
+            id="puzzleStatus"
+            class="section-description"
+            aria-live="polite"
+            style="margin-top: 14px;">
+
+
+        </p>
+
+        <div id="reward" class="reward-overlay">
+
+            <h3 class="reward-title">
+                ¡ERES LA MEJOR!
+            </h3>
+
+            <p
+                style="font-size: 1.1rem;
+                       margin-top: 6px;
+                       color: var(--yellow-accent);">
+
+                Te quiero mucho. Te ganaste una fruna :D
+
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- ==================================================
+         8. GALERÍA DE FOTOS
+         ================================================== -->
+
+    <section class="bento-card memory-card">
+
+        <span class="tag">&lt;3</span>
+
+        <h2 class="memory-title">
+            ¡Feliz primer mes de novios!
+        </h2>
+
+        <p class="memory-description">
+            Este primer mes tan especial y los meses desde que te conozco, me han hecho saber lo increible que eres, cada momento a tu lado se siente demasiado bien y esto es solo el comienzo de todo lo que nos espera. Me siento orgulloso de tener una persona tan maravillosa, inteligente y hermosa en mi vida como lo eres tu.
+        </p>
+
+        <div class="gallery-grid">
+
+            <div class="photo-wrapper">
+                <img
+                    src="{{ url_for('static', filename='foto1.jpg') }}"
+                    alt="Un recuerdo de nosotros"
+                    class="gallery-photo"
+                    loading="lazy">
+            </div>
+
+            <div class="photo-wrapper">
+                <img
+                    src="{{ url_for('static', filename='foto2.jpg') }}"
+                    alt="Otro recuerdo especial"
+                    class="gallery-photo"
+                    loading="lazy">
+            </div>
+
+            <div class="photo-wrapper">
+                <img
+                    src="{{ url_for('static', filename='foto3.jpg') }}"
+                    alt="Un momento juntos"
+                    class="gallery-photo"
+                    loading="lazy">
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<!-- ======================================================
+     VENTANA DE LA CARTA
+     Se encuentra fuera de la rejilla para cubrir la pantalla.
+     ====================================================== -->
+
+<div
+    id="letterOverlay"
+    class="letter-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="letterTitle"
+    aria-hidden="true">
+
+    <article class="letter-paper">
+
+        <h3 id="letterTitle">
+            FELIZ SEGUNDO MES AMOR &lt;3
+        </h3>
+
+        <p>
+            Querida Gerital
+        </p>
+
+        <p>
+            Hoy cumplimos dos meses y quería regalarte algo que pudieras abrir cuando quisieras recordar cuánto te quiero, además de que se vuelva na caja de recuerdos para nuestro amor.
+        </p>
+
+        <p>
+            Me gusta coincidir contigo en este mundo tan grande, me gusta lo que estamos construyendo,lo que aprendo de ti y la tranquilidad que siento cuando compartimos nuestros pequeños momentos.
+        </p>
+
+        <p>
+            No necesito que todos los días sean perfectos,quiero que sigamos conociéndonos, riéndonos, acompañándonos y encontrando nuevas razones para elegirnos.
+        </p>
+
+        <p>
+            Gracias por estos dos meses, por ser tú y por dejarme formar parte de tu vida y dejarme entrar en tu hermoso corazón.
+        </p>
+
+        <p>
+            Ojalá este sea solamente el segundo capítulo de una historia que nos siga dando motivos para sonreír.
+        </p>
+
+        <div class="letter-signature">
+            Te quiero muchote, mi Gerital.
+        </div>
+
+        <button
+            type="button"
+            id="closeLetter"
+            class="letter-close">
+
+            Cerrar carta
+
+        </button>
+
+    </article>
+
+</div>
+<!-- VENTANA EMERGENTE DE LOS RECUERDOS -->
+<div
+    id="starModal"
+    class="memory-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="starModalTitle"
+    aria-hidden="true">
+
+    <article class="memory-modal-card">
+
+        <button
+            type="button"
+            id="closeStarModal"
+            class="memory-modal-close"
+            aria-label="Cerrar recuerdo">
+            &times;
+        </button>
+
+        <div class="memory-modal-photo-wrap">
+
+            <img
+                id="starModalPhoto"
+                class="memory-modal-photo"
+                src=""
+                alt=""
+            >
+
+            <div
+                id="starPhotoFallback"
+                class="star-photo-fallback hidden">
+
+
+            </div>
+
+        </div>
+
+        <div class="memory-modal-content">
+
+            <span
+                id="starModalLabel"
+                class="star-detail-label">
+                ESTRELLA 01
+            </span>
+
+            <h3
+                id="starModalTitle"
+                class="memory-modal-title">
+                Un recuerdo contigo
+            </h3>
+
+            <p
+                id="starModalText"
+                class="memory-modal-text">
+                Cada pequeño momento contigo merece
+                quedarse guardado.
+            </p>
+
+            <p class="memory-modal-footer">
+                Un pedacito de nuestra historia.
+            </p>
+
+        </div>
+
+    </article>
+
+</div>
+
+<script>
+"use strict";
+
+
+/* ========================================================
+   1. JARDÍN BOTÁNICO
+   Conserva los girasoles y lirios animados del primer mes.
+   ======================================================== */
+
+const canvas = document.getElementById("botanicalCanvas");
+const ctx = canvas.getContext("2d");
+
+let flora = [];
+
+class Plant {
+
+    constructor(x, targetY, type, scale, delay) {
+
+        this.x = x;
+        this.currentY = canvas.height + 60;
+        this.targetY = targetY;
+        this.type = type;
+        this.scale = scale;
+        this.delay = delay;
+
+        this.stemSpeed =
+            (2.2 + Math.random() * 1.2) * scale;
+
+        this.bloomProgress = 0;
+
+        this.maxBloom =
+            (18 + Math.random() * 8) * scale;
+
+        this.bloomSpeed = 0.28 * scale;
+        this.ticks = 0;
+    }
+
+    drawStem() {
+
+        ctx.beginPath();
+
+        ctx.moveTo(this.x, canvas.height);
+
+        ctx.quadraticCurveTo(
+            this.x + Math.sin(this.currentY * 0.008) * 18,
+            (canvas.height + this.currentY) / 2,
+            this.x,
+            this.currentY
+        );
+
+        ctx.strokeStyle =
+            this.type === "sunflower"
+                ? "#1b4332"
+                : "#2d5a27";
+
+        ctx.lineWidth = 3.5 * this.scale;
+        ctx.stroke();
+    }
+
+    drawSunflower() {
+
+        const petals = 18;
+
+        for (let i = 0; i < petals; i++) {
+
+            const angle = (i * Math.PI * 2) / petals;
+
+            const px =
+                this.x +
+                Math.cos(angle) * this.bloomProgress * 1.15;
+
+            const py =
+                this.targetY +
+                Math.sin(angle) * this.bloomProgress * 1.15;
+
+            ctx.beginPath();
+
+            ctx.ellipse(
+                px,
+                py,
+                this.bloomProgress,
+                this.bloomProgress * 0.38,
+                angle,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fillStyle = "#ffc300";
+            ctx.fill();
         }
-        resize();
-        window.addEventListener('resize', resize);
 
-        class Plant {
-            constructor(x, targetY, type, scale, delay) {
-                this.x = x;
-                this.currentY = canvas.height + 60;
-                this.targetY = targetY;
-                this.type = type;
-                this.scale = scale;
-                this.delay = delay;
+        ctx.beginPath();
 
-                this.stemSpeed = (2.2 + Math.random() * 1.2) * scale;
-                this.bloomProgress = 0;
-                this.maxBloom = (18 + Math.random() * 8) * scale;
-                this.bloomSpeed = 0.28 * scale;
-                this.ticks = 0;
-            }
+        ctx.arc(
+            this.x,
+            this.targetY,
+            this.bloomProgress * 0.6,
+            0,
+            Math.PI * 2
+        );
 
-            drawStem() {
-                ctx.beginPath();
-                ctx.moveTo(this.x, canvas.height);
-                ctx.quadraticCurveTo(
-                    this.x + Math.sin(this.currentY * 0.008) * 18,
-                    (canvas.height + this.currentY) / 2,
-                    this.x,
-                    this.currentY
-                );
-                ctx.strokeStyle = this.type === 'sunflower' ? '#1b4332' : '#2d5a27';
-                ctx.lineWidth = 3.5 * this.scale;
-                ctx.stroke();
-            }
+        ctx.fillStyle = "#280d00";
+        ctx.fill();
+    }
 
-            drawSunflower() {
-                const petals = 18;
-                for (let i = 0; i < petals; i++) {
-                    const angle = (i * Math.PI * 2) / petals;
-                    const px = this.x + Math.cos(angle) * (this.bloomProgress * 1.15);
-                    const py = this.targetY + Math.sin(angle) * (this.bloomProgress * 1.15);
-                    ctx.beginPath();
-                    ctx.ellipse(px, py, this.bloomProgress, this.bloomProgress * 0.38, angle, 0, Math.PI * 2);
-                    ctx.fillStyle = '#ffc300';
-                    ctx.fill();
-                }
-                ctx.beginPath();
-                ctx.arc(this.x, this.targetY, this.bloomProgress * 0.6, 0, Math.PI * 2);
-                ctx.fillStyle = '#280d00';
-                ctx.fill();
-            }
+    drawLily() {
 
-            drawLily() {
-                const petals = 6;
-                for (let i = 0; i < petals; i++) {
-                    const angle = (i * Math.PI * 2) / petals;
-                    const px = this.x + Math.cos(angle) * (this.bloomProgress * 0.85);
-                    const py = this.targetY + Math.sin(angle) * (this.bloomProgress * 0.85);
-                    ctx.beginPath();
-                    ctx.ellipse(px, py, this.bloomProgress * 1.25, this.bloomProgress * 0.42, angle, 0, Math.PI * 2);
-                    ctx.fillStyle = i % 2 === 0 ? '#ff85a1' : '#f8f9fa';
-                    ctx.fill();
-                }
-                ctx.beginPath();
-                ctx.arc(this.x, this.targetY, this.bloomProgress * 0.2, 0, Math.PI * 2);
-                ctx.fillStyle = '#70e000';
-                ctx.fill();
-            }
+        const petals = 6;
 
-            update() {
-                if (this.ticks < this.delay) {
-                    this.ticks++;
-                    return;
-                }
-                if (this.currentY > this.targetY) {
-                    this.currentY -= this.stemSpeed;
-                } else if (this.bloomProgress < this.maxBloom) {
-                    this.bloomProgress += this.bloomSpeed;
-                }
+        for (let i = 0; i < petals; i++) {
 
-                this.drawStem();
+            const angle = (i * Math.PI * 2) / petals;
 
-                if (this.currentY <= this.targetY) {
-                    if (this.type === 'sunflower') this.drawSunflower();
-                    else if (this.type === 'lily') this.drawLily();
-                }
-            }
+            const px =
+                this.x +
+                Math.cos(angle) * this.bloomProgress * 0.85;
+
+            const py =
+                this.targetY +
+                Math.sin(angle) * this.bloomProgress * 0.85;
+
+            ctx.beginPath();
+
+            ctx.ellipse(
+                px,
+                py,
+                this.bloomProgress * 1.25,
+                this.bloomProgress * 0.42,
+                angle,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fillStyle =
+                i % 2 === 0 ? "#ff85a1" : "#f8f9fa";
+
+            ctx.fill();
         }
 
-        let flora = [];
+        ctx.beginPath();
 
-        function buildBalancedGarden() {
-            flora = [];
+        ctx.arc(
+            this.x,
+            this.targetY,
+            this.bloomProgress * 0.2,
+            0,
+            Math.PI * 2
+        );
 
-            const totalPlants = 11;
-            const margin = 40;
-            const step = (canvas.width - margin * 2) / (totalPlants - 1);
+        ctx.fillStyle = "#70e000";
+        ctx.fill();
+    }
 
-            for (let i = 0; i < totalPlants; i++) {
-                const x = margin + step * i + (Math.random() * 24 - 12);
-                const yRatio = (i % 3 === 0) ? 0.15 : (i % 2 === 0) ? 0.32 : 0.52;
-                const y = canvas.height * (yRatio + Math.random() * 0.1);
-                
-                const type = i % 2 === 0 ? 'sunflower' : 'lily';
-                const scale = 0.7 + (1 - yRatio) * 0.4;
-                const delay = i * 4;
+    update() {
 
-                flora.push(new Plant(x, y, type, scale, delay));
+        if (this.ticks < this.delay) {
+            this.ticks++;
+            return;
+        }
+
+        if (this.currentY > this.targetY) {
+
+            this.currentY -= this.stemSpeed;
+
+        } else if (this.bloomProgress < this.maxBloom) {
+
+            this.bloomProgress += this.bloomSpeed;
+        }
+
+        this.drawStem();
+
+        if (this.currentY <= this.targetY) {
+
+            if (this.type === "sunflower") {
+                this.drawSunflower();
+            } else if (this.type === "lily") {
+                this.drawLily();
             }
         }
+    }
+}
 
-        buildBalancedGarden();
 
-        function render() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            flora.forEach(plant => plant.update());
-            requestAnimationFrame(render);
+function buildBalancedGarden() {
+
+    flora = [];
+
+    const totalPlants = 11;
+    const margin = 40;
+
+    const step =
+        (canvas.width - margin * 2) / (totalPlants - 1);
+
+    for (let i = 0; i < totalPlants; i++) {
+
+        const x =
+            margin +
+            step * i +
+            (Math.random() * 24 - 12);
+
+        const yRatio =
+            i % 3 === 0
+                ? 0.15
+                : i % 2 === 0
+                    ? 0.32
+                    : 0.52;
+
+        const y =
+            canvas.height *
+            (yRatio + Math.random() * 0.1);
+
+        const type =
+            i % 2 === 0 ? "sunflower" : "lily";
+
+        const scale =
+            0.7 + (1 - yRatio) * 0.4;
+
+        flora.push(
+            new Plant(x, y, type, scale, i * 4)
+        );
+    }
+}
+
+
+function resizeGarden() {
+
+    const container = canvas.parentElement;
+
+    canvas.width = container.clientWidth;
+    canvas.height = container.clientHeight;
+
+    buildBalancedGarden();
+}
+
+
+function renderGarden() {
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    flora.forEach(plant => plant.update());
+
+    requestAnimationFrame(renderGarden);
+}
+
+
+resizeGarden();
+
+window.addEventListener("resize", resizeGarden);
+
+renderGarden();
+
+
+/* ========================================================
+   2. CARTA SECRETA
+   Abre y cierra el sobre y la carta.
+   ======================================================== */
+
+const openLetterButton =
+    document.getElementById("openLetter");
+
+const closeLetterButton =
+    document.getElementById("closeLetter");
+
+const letterOverlay =
+    document.getElementById("letterOverlay");
+
+let lastLetterFocus = null;
+
+
+function openLetter() {
+
+    lastLetterFocus = document.activeElement;
+
+    openLetterButton.classList.add("is-open");
+
+    window.setTimeout(() => {
+
+        letterOverlay.classList.add("is-open");
+
+        letterOverlay.setAttribute("aria-hidden", "false");
+
+        closeLetterButton.focus();
+
+    }, 380);
+}
+
+
+function closeLetter() {
+
+    letterOverlay.classList.remove("is-open");
+
+    letterOverlay.setAttribute("aria-hidden", "true");
+
+    openLetterButton.classList.remove("is-open");
+
+    if (lastLetterFocus) {
+        lastLetterFocus.focus();
+    }
+}
+
+
+openLetterButton.addEventListener("click", openLetter);
+
+closeLetterButton.addEventListener("click", closeLetter);
+
+letterOverlay.addEventListener("click", event => {
+
+    if (event.target === letterOverlay) {
+        closeLetter();
+    }
+
+});
+
+
+document.addEventListener("keydown", event => {
+
+    if (
+        event.key === "Escape" &&
+        letterOverlay.classList.contains("is-open")
+    ) {
+        closeLetter();
+    }
+
+});
+
+
+/* ========================================================
+   3. UNIVERSO DE RECUERDOS + VENTANA CON FOTOGRAFÍAS
+   ======================================================== */
+
+const memories = [
+    {
+        title: "Lo bonito de coincidir",
+        text: "En una generación que parece perdida, me hace muy feliz haber encontrado un corazón tan bonito como el tuyo."
+    },
+    {
+        title: "Tu forma de ser",
+        text: "Me gusta descubrir esos pequeños detalles que te hacen ser tú. Siempre hay algo nuevo que me hace querer quedarme."
+    },
+    {
+        title: "Nuestros momentos",
+        text: "Los momentos sencillos contigo de nuestro dia a dia también se vuelven recuerdos especiales. No todo necesita ser extraordinario para ser bonito."
+    },
+    {
+        title: "Tu sonrisa",
+        text: "Me encanta verte sonreír. Cuando comparto momentos contigo hace que todo se sienta un poquito mejor."
+    },
+    {
+        title: "Lo que estamos construyendo",
+        text: "Este camino es de aprendizaje mutuo, pero cada dia haces que te quiera mucho más y no queria irme de tu lado."
+    },
+    {
+        title: "Lo que todavía falta",
+        text: "Esta historia apenas lleva dos capítulos. Me ilusiona pensar en todas las cosas que aún podemos compartir, no quiero soltar tu mano mi amorcito."
+    }
+];
+
+const starPositions = [
+    { left: 13, top: 22 },
+    { left: 35, top: 58 },
+    { left: 55, top: 18 },
+    { left: 77, top: 40 },
+    { left: 88, top: 72 },
+    { left: 48, top: 79 }
+];
+
+const universeScene =
+    document.getElementById("universeScene");
+
+const starDetailTitle =
+    document.getElementById("starDetailTitle");
+
+const starDetailText =
+    document.getElementById("starDetailText");
+
+const universeProgressText =
+    document.getElementById("universeProgressText");
+
+const universeProgressFill =
+    document.getElementById("universeProgressFill");
+
+const universeProgress =
+    document.getElementById("universeProgress");
+
+/* Elementos de la ventana emergente */
+
+const starModal =
+    document.getElementById("starModal");
+
+const closeStarModalButton =
+    document.getElementById("closeStarModal");
+
+const starModalPhoto =
+    document.getElementById("starModalPhoto");
+
+const starPhotoFallback =
+    document.getElementById("starPhotoFallback");
+
+const starModalLabel =
+    document.getElementById("starModalLabel");
+
+const starModalTitle =
+    document.getElementById("starModalTitle");
+
+const starModalText =
+    document.getElementById("starModalText");
+
+/*
+ * Flask genera la URL base de static.
+ * Las fotos deben llamarse estrella1.jpg, estrella2.jpg,
+ * etc., y estar directamente dentro de la carpeta static.
+ */
+const starPhotoBaseUrl =
+    "{{ url_for('static', filename='') }}";
+
+const discoveredStars = new Set();
+
+let lastStarFocus = null;
+
+
+function updateUniverseProgress() {
+
+    const count = discoveredStars.size;
+
+    universeProgressText.textContent =
+        `${count} de ${memories.length} recuerdos`;
+
+    universeProgressFill.style.width =
+        `${(count / memories.length) * 100}%`;
+
+    universeProgress.setAttribute(
+        "aria-valuenow",
+        count
+    );
+}
+
+
+function openStarMemory(index, starButton) {
+
+    const memory = memories[index];
+
+    lastStarFocus = starButton;
+
+    /* Actualiza el texto debajo del cielo */
+
+    starDetailTitle.textContent = memory.title;
+    starDetailText.textContent = memory.text;
+
+    /* Actualiza los datos de la ventana */
+
+    starModalLabel.textContent =
+        `ESTRELLA ${String(index + 1).padStart(2, "0")}`;
+
+    starModalTitle.textContent = memory.title;
+    starModalText.textContent = memory.text;
+
+    /*
+     * estrella1.jpg corresponde a la primera estrella,
+     * estrella2.jpg a la segunda y así sucesivamente.
+     */
+
+    starModalPhoto.alt =
+        `Fotografía del recuerdo: ${memory.title}`;
+
+    starModalPhoto.classList.remove("hidden");
+    starPhotoFallback.classList.add("hidden");
+
+    starModalPhoto.onerror = () => {
+
+        starModalPhoto.classList.add("hidden");
+        starPhotoFallback.classList.remove("hidden");
+
+    };
+
+    starModalPhoto.src =
+        `${starPhotoBaseUrl}estrella${index + 1}.jpg`;
+
+    /*
+     * Actualiza la estrella seleccionada y el progreso.
+     */
+
+    document
+        .querySelectorAll(".universe-star")
+        .forEach(star => {
+            star.classList.remove("is-active");
+        });
+
+    starButton.classList.add("is-active");
+
+    discoveredStars.add(index);
+
+    starButton.setAttribute(
+        "aria-label",
+        `Recuerdo descubierto: ${memory.title}`
+    );
+
+    updateUniverseProgress();
+
+    /* Abre la ventana */
+
+    starModal.classList.add("is-open");
+    starModal.setAttribute("aria-hidden", "false");
+
+    closeStarModalButton.focus();
+
+}
+
+
+function closeStarMemory() {
+
+    starModal.classList.remove("is-open");
+    starModal.setAttribute("aria-hidden", "true");
+
+    if (lastStarFocus) {
+        lastStarFocus.focus();
+    }
+
+}
+
+
+function createStars() {
+
+    universeScene.innerHTML = "";
+
+    memories.forEach((memory, index) => {
+
+        const star = document.createElement("button");
+
+        star.type = "button";
+        star.className = "universe-star";
+
+        if (index % 2 === 1) {
+            star.classList.add("pink-star");
+        } else if (index % 3 === 0) {
+            star.classList.add("yellow-star");
         }
-        render();
 
-        // Lógica del rompecabezas desde servidor
-        const puzzleBoard = document.getElementById('puzzleBoard');
-        const reward = document.getElementById('reward');
-        let selectedPiece = null;
+        star.style.left =
+            `${starPositions[index].left}%`;
 
-        function initPuzzle() {
-            const img = new Image();
-            img.src = '/static/foto.png';
-            
-            img.onload = () => {
-                puzzleBoard.innerHTML = '';
-                
-                const pieceSize = window.innerWidth <= 850 ? 85 : 100;
-                const totalSize = pieceSize * 3;
+        star.style.top =
+            `${starPositions[index].top}%`;
 
-                const cropCanvas = document.createElement('canvas');
-                const cropCtx = cropCanvas.getContext('2d');
-                cropCanvas.width = totalSize;
-                cropCanvas.height = totalSize;
+        star.setAttribute(
+            "aria-label",
+            `Descubrir recuerdo ${index + 1}: ${memory.title}`
+        );
 
-                const minDim = Math.min(img.width, img.height);
-                cropCtx.drawImage(
-                    img,
-                    (img.width - minDim) / 2, (img.height - minDim) / 2, minDim, minDim,
-                    0, 0, totalSize, totalSize
-                );
+        star.addEventListener("click", () => {
+            openStarMemory(index, star);
+        });
 
-                let positions = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-                let shuffled = [...positions].sort(() => Math.random() - 0.5);
+        universeScene.appendChild(star);
 
-                shuffled.forEach((pos) => {
-                    const row = Math.floor(pos / 3);
-                    const col = pos % 3;
+    });
 
-                    const pieceCanvas = document.createElement('canvas');
-                    pieceCanvas.width = pieceSize;
-                    pieceCanvas.height = pieceSize;
-                    pieceCanvas.className = 'puzzle-piece';
-                    pieceCanvas.dataset.correctPos = pos;
+}
 
-                    const pCtx = pieceCanvas.getContext('2d');
-                    pCtx.drawImage(cropCanvas, col * pieceSize, row * pieceSize, pieceSize, pieceSize, 0, 0, pieceSize, pieceSize);
 
-                    pieceCanvas.addEventListener('click', () => handlePieceClick(pieceCanvas));
-                    puzzleBoard.appendChild(pieceCanvas);
-                });
-            };
+/* Cerrar con el botón */
+
+closeStarModalButton.addEventListener(
+    "click",
+    closeStarMemory
+);
+
+
+/* Cerrar pulsando fuera de la tarjeta */
+
+starModal.addEventListener("click", event => {
+
+    if (event.target === starModal) {
+        closeStarMemory();
+    }
+
+});
+
+
+/* Cerrar pulsando Escape */
+
+document.addEventListener("keydown", event => {
+
+    if (
+        event.key === "Escape" &&
+        starModal.classList.contains("is-open")
+    ) {
+        closeStarMemory();
+    }
+
+});
+
+
+createStars();
+updateUniverseProgress();
+
+/* ========================================================
+   4. MÁQUINA DE PREMIOS
+   Los premios son cupones que puedes cumplir en persona.
+   Puedes editar los textos libremente.
+   ======================================================== */
+
+const prizes = [
+
+    {
+        title: "Premio desbloqueado: un paseo",
+        text: "Te ganaste una salida a un pueblito, salir a desconectarnos un rato.",
+        note: "Vale por una viaje juntos."
+    },
+
+    {
+        title: "Premio desbloqueado: abrazos",
+        text: "Este premio se reclama en persona y no tiene límite de duración.",
+        note: "Vale por una sesión de abrazos."
+    },
+
+    {
+        title: "Premio desbloqueado: comida rica",
+        text: "Hoy tienes derecho a escoger algo delicioso para compartir conmigo.",
+        note: "Vale por una salida a comer."
+    },
+
+    {
+        title: "Premio desbloqueado: besos",
+        text: "Una pequeña tarde llena de besos y mucho cariño.",
+        note: "Vale por una tarde romántica."
+    },
+
+    {
+        title: "Premio desbloqueado: día de consentirte",
+        text: "Hoy la misión es hacerte sonreír y pasar un rato bonito contigo.",
+        note: "Vale por un día especial."
+    }
+
+];
+
+
+const machineButton =
+    document.getElementById("grabPrize");
+
+const machineClaw =
+    document.getElementById("machineClaw");
+
+const prizeResult =
+    document.getElementById("prizeResult");
+
+const prizeResultTitle =
+    document.getElementById("prizeResultTitle");
+
+const prizeResultText =
+    document.getElementById("prizeResultText");
+
+const prizeResultNote =
+    document.getElementById("prizeResultNote");
+
+
+let lastPrizeIndex = -1;
+
+
+function selectPrize() {
+
+    let index;
+
+    do {
+
+        index = Math.floor(Math.random() * prizes.length);
+
+    } while (
+        prizes.length > 1 &&
+        index === lastPrizeIndex
+    );
+
+    lastPrizeIndex = index;
+
+    return prizes[index];
+}
+
+
+machineButton.addEventListener("click", () => {
+
+    machineButton.disabled = true;
+
+    prizeResult.classList.remove("is-visible");
+
+    machineClaw.style.left =
+        `${15 + Math.random() * 70}%`;
+
+    machineClaw.style.top = "115px";
+
+    window.setTimeout(() => {
+
+        machineClaw.style.top = "18px";
+
+    }, 450);
+
+    window.setTimeout(() => {
+
+        const prize = selectPrize();
+
+        prizeResultTitle.textContent = prize.title;
+
+        prizeResultText.textContent = prize.text;
+
+        prizeResultNote.textContent = prize.note;
+
+        prizeResult.classList.add("is-visible");
+
+        machineButton.disabled = false;
+
+    }, 1000);
+
+});
+
+
+/* ========================================================
+   5. ROMPECABEZAS
+   Conserva la imagen foto.png y el tablero 3 x 3.
+   ======================================================== */
+
+const puzzleBoard =
+    document.getElementById("puzzleBoard");
+
+const reward =
+    document.getElementById("reward");
+
+const puzzleStatus =
+    document.getElementById("puzzleStatus");
+
+
+let selectedPiece = null;
+
+
+function initPuzzle() {
+
+    const img = new Image();
+
+    img.src = "{{ url_for('static', filename='foto.png') }}";
+
+    img.onload = () => {
+
+        puzzleBoard.innerHTML = "";
+
+        selectedPiece = null;
+
+        reward.style.display = "none";
+
+        puzzleStatus.textContent =
+            "Selecciona dos piezas para intercambiarlas.";
+
+        const pieceSize =
+            window.innerWidth <= 850 ? 85 : 100;
+
+        const totalSize = pieceSize * 3;
+
+        const cropCanvas = document.createElement("canvas");
+
+        const cropCtx = cropCanvas.getContext("2d");
+
+        cropCanvas.width = totalSize;
+        cropCanvas.height = totalSize;
+
+        const minDim = Math.min(img.width, img.height);
+
+        cropCtx.drawImage(
+            img,
+            (img.width - minDim) / 2,
+            (img.height - minDim) / 2,
+            minDim,
+            minDim,
+            0,
+            0,
+            totalSize,
+            totalSize
+        );
+
+        const positions = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+
+        // Mezcla Fisher-Yates para evitar una mezcla sesgada.
+        for (let i = positions.length - 1; i > 0; i--) {
+
+            const j = Math.floor(Math.random() * (i + 1));
+
+            [positions[i], positions[j]] =
+                [positions[j], positions[i]];
         }
 
-        function handlePieceClick(piece) {
-            if (!selectedPiece) {
-                selectedPiece = piece;
-                piece.style.outline = '2px solid var(--pink-accent)';
-            } else {
-                if (selectedPiece !== piece) {
-                    const nextSiblingSelected = selectedPiece.nextSibling === piece ? selectedPiece : selectedPiece.nextSibling;
-                    puzzleBoard.insertBefore(selectedPiece, piece);
-                    puzzleBoard.insertBefore(piece, nextSiblingSelected);
-                    checkWin();
-                }
-                selectedPiece.style.outline = 'none';
-                selectedPiece = null;
-            }
-        }
+        positions.forEach(pos => {
 
-        function checkWin() {
-            const currentPieces = Array.from(puzzleBoard.children);
-            const isCorrect = currentPieces.every((piece, index) => {
-                return parseInt(piece.dataset.correctPos) === index;
+            const row = Math.floor(pos / 3);
+
+            const col = pos % 3;
+
+            const pieceCanvas =
+                document.createElement("canvas");
+
+            pieceCanvas.width = pieceSize;
+
+            pieceCanvas.height = pieceSize;
+
+            pieceCanvas.className = "puzzle-piece";
+
+            pieceCanvas.dataset.correctPos = pos;
+
+            pieceCanvas.setAttribute(
+                "aria-label",
+                `Pieza del rompecabezas ${pos + 1}`
+            );
+
+            const pCtx =
+                pieceCanvas.getContext("2d");
+
+            pCtx.drawImage(
+                cropCanvas,
+                col * pieceSize,
+                row * pieceSize,
+                pieceSize,
+                pieceSize,
+                0,
+                0,
+                pieceSize,
+                pieceSize
+            );
+
+            pieceCanvas.addEventListener("click", () => {
+
+                handlePieceClick(pieceCanvas);
+
             });
 
-            if (isCorrect) {
-                reward.style.display = 'flex';
-            }
-        }
+            puzzleBoard.appendChild(pieceCanvas);
 
-        initPuzzle();
-    </script>
+        });
+
+    };
+
+
+    img.onerror = () => {
+
+        puzzleBoard.innerHTML = "";
+
+        puzzleStatus.textContent =
+            "No se pudo cargar foto.png. Revisa que esté dentro de static.";
+
+    };
+
+}
+
+
+function handlePieceClick(piece) {
+
+    if (!selectedPiece) {
+
+        selectedPiece = piece;
+
+        piece.style.outline =
+            "2px solid var(--pink-accent)";
+
+        puzzleStatus.textContent =
+            "Ahora selecciona la segunda pieza.";
+
+        return;
+    }
+
+    if (selectedPiece === piece) {
+
+        selectedPiece.style.outline = "none";
+
+        selectedPiece = null;
+
+        puzzleStatus.textContent =
+            "Selecciona dos piezas para intercambiarlas.";
+
+        return;
+    }
+
+    const pieces = Array.from(puzzleBoard.children);
+
+    const firstIndex = pieces.indexOf(selectedPiece);
+
+    const secondIndex = pieces.indexOf(piece);
+
+    if (firstIndex === -1 || secondIndex === -1) {
+
+        selectedPiece = null;
+
+        return;
+    }
+
+    [pieces[firstIndex], pieces[secondIndex]] =
+        [pieces[secondIndex], pieces[firstIndex]];
+
+    pieces.forEach(item => {
+
+        item.style.outline = "none";
+
+        puzzleBoard.appendChild(item);
+
+    });
+
+    selectedPiece = null;
+
+    checkWin();
+
+}
+
+
+function checkWin() {
+
+    const currentPieces =
+        Array.from(puzzleBoard.children);
+
+    const isCorrect =
+        currentPieces.every((piece, index) => {
+
+            return Number(piece.dataset.correctPos) === index;
+
+        });
+
+    if (isCorrect) {
+
+        reward.style.display = "flex";
+
+        puzzleStatus.textContent =
+            "";
+
+    } else {
+
+        puzzleStatus.textContent =
+            "Sigue intentando. Selecciona otras dos piezas.";
+
+    }
+
+}
+
+
+initPuzzle();
+
+</script>
+
 </body>
 </html>
